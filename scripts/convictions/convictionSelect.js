@@ -7,7 +7,6 @@ eventHub.addEventListener("change", event => {
     if (event.target.id === "crimeSelect") {
         
         const customEvent = new CustomEvent("crimeChosen", {
-
             detail: {
                 crimeThatWasChosen: event.target.value
             }
