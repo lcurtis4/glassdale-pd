@@ -1,19 +1,41 @@
-import { getCriminals } from "./criminalProvider.js" 
-import { useCriminals } from "./criminalProvider.js" 
+import { getCriminals, useCriminals } from "./criminalProvider.js" 
 import { Criminal } from "./criminal.js"
-getCriminals() 
-useCriminals() 
+import { useConvictions } from "../convictions/convictionProvider.js"
+
+const criminalElement = document.querySelector(".criminalsContainer")
+const eventHub = document.querySelector(".container")
+
+const render = (criminals) => {
+    let criminalCards =[]
+    for (const perp of criminals) {
+        criminalCards.push(Criminal(perp))
+    }
+
+    criminalElement.innerHTML = criminalCards.join("") 
+}
+
+
+eventHub.addEventListener('crimeChosen', event => {
+
+
+    if (event.detail.crimeThatWasChosen !== "0"){
+        
+        
+        
+        console.log('crime', event.detail);
+        const crimes = useConvictions()
+        const crime = crimes.find( (crime) => crime.id === parseInt(event.detail.crimeThatWasChosen) )
+
+        const criminals = useCriminals()
+        const matchingCriminals = criminals.filter( (criminal) => criminal.conviction === crime.name )
+
+        render(matchingCriminals)
+    }
+})
 
 export const CriminalList = () => {
-    getCriminals().then( 
-        () => {
-            const usedCriminals = useCriminals()
-            const contentElement = document.querySelector(".criminalsContainer")
-            for (const criminal of usedCriminals) {
-                const criminalHTML = Criminal(criminal)
-                contentElement.innerHTML += criminalHTML
-
-            }
-        }
-    )
+    getCriminals().then( () => {
+            let perps = useCriminals()
+            render(perps)
+        })
 }
