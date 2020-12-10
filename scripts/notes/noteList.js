@@ -10,7 +10,7 @@ eventHub.addEventListener("showNotesClicked", () => {
     NoteList()
 })
 
-eventHub.addEventListener("noteStatechanged", () => {
+eventHub.addEventListener("noteStateChanged", () => {
     NoteList()
 })
 
