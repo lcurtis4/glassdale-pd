@@ -2,10 +2,13 @@ import { getCriminals, useCriminals } from "./criminalProvider.js"
 import { Criminal } from "./criminal.js"
 import { useConvictions } from "../convictions/convictionProvider.js"
 import { useOfficers } from "../officers/officerProvider.js"
+import { getFacilities, useFacilities } from "../facility/facilityProvider.js"
+import { getCriminalFacilities, useCriminalFacilities } from "../facility/criminalFacilityProvider.js"
 
-const criminalElement = document.querySelector(".criminalsContainer")
+const contentTarget = document.querySelector(".criminalsContainer")
 const eventHub = document.querySelector(".container")
 
+/* 
 const render = (criminals) => {
     let criminalCards =[]
     for (const perp of criminals) {
@@ -13,6 +16,30 @@ const render = (criminals) => {
     }
 
     criminalElement.innerHTML = criminalCards.join("") 
+}
+*/
+
+let criminals = []
+let facilities = []
+let criminalFacilities = []
+
+const render = (criminalsToRender) => {
+    // Step 1 - Iterate all criminals
+    contentTarget.innerHTML = criminalsToRender.map(
+        (criminalObject) => {
+            // Step 2 - Filter all relationships to get only ones for this criminal
+            const facilityRelationshipsForThisCriminal = criminalFacilities.filter(cf => cf.criminalId === criminalObject.id)
+
+            // Step 3 - Convert the relationships to facilities with map()
+            const matchingFacilities = facilityRelationshipsForThisCriminal.map(cf => {
+                const matchingFacilityObject = facilities.find(facility => facility.id === cf.facilityId)
+                return matchingFacilityObject
+            })
+
+            // Must pass the matching facilities to the Criminal component
+            return Criminal(criminalObject, matchingFacilities)
+        }
+    ).join("")
 }
 
 eventHub.addEventListener('crimeChosen', event => {
@@ -49,8 +76,15 @@ eventHub.addEventListener("officerSelected", event => {
     
 
 export const CriminalList = () => {
-    getCriminals().then( () => {
-            let perps = useCriminals()
-            render(perps)
-        })
+    getCriminals()
+    .then(getFacilities)
+    .then(getCriminalFacilities)
+    .then(
+        ()=> {
+            facilities = useFacilities()
+            criminalFacilities = useCriminalFacilities()
+            criminals = useCriminals()
+            render(criminals, facilities, criminalFacilities)
+        }
+    )
 }
